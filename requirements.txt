@@ -1,0 +1,10 @@
+pdfminer.six
+transformers
+nltk
+chromadb
+langchain
+langchain-openai
+langchain-chroma
+langchain-community
+dashscope
+pypdf
