@@ -1,6 +1,7 @@
 pdfminer.six
 transformers
 nltk
+openai
 chromadb
 langchain
 langchain-openai
@@ -13,3 +14,8 @@ timm
 fitz
 frontend
 PyMuPDF
+pdfplumber
+camelot-py[cv]
+PyPDF2==2.12.1
+tabulate
+pandas

@@ -150,7 +150,7 @@ def encode_image(image_path):
 def image_qa(query, image_path):
     base64_image = encode_image(image_path)
     response = client.chat.completions.create(
-        model="qwen-plus",
+        model="qwen2.5-vl-7b-instruct",
         temperature=0.3,
         seed=42,
         messages=[{
