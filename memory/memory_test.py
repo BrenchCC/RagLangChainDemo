@@ -25,11 +25,11 @@ def main():
     # 添加命令行参数
     parser.add_argument('--api_base', type=str, default="https://dashscope.aliyuncs.com/compatible-mode/v1",
                         help='OpenAI API基础URL')
-    parser.add_argument('--api_key', type=str, default="sk-1c33a0011b5c4ef6ac842d58255a20d8",
+    parser.add_argument('--api_key', type=str, default="",
                         help='OpenAI API密钥')
     parser.add_argument('--model', type=str, default="qwen-plus",
                         help='OpenAI模型名称')
-    parser.add_argument('--prompt_template', type=str, default="./memory/prompt_template.txt",
+    parser.add_argument('--prompt_template', type=str, default="./prompts/prompt_template.txt",
                         help='提示模板文件路径')
     parser.add_argument('--db_path', type=str, default="sqlite:///memory/memory.db",
                         help='SQLite数据库路径')
