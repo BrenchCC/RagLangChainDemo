@@ -98,10 +98,10 @@ def format_search_result(search_result):
                     # 代码块，用换行符和```包围，并去除多余空白字符
                     parts[i] = f"\n```\n{part.strip()}\n```\n"
             paragraph = " ".join(parts)
-
-        else:
-            # 否则，将句子中的句点后面的空格替换为换行符，以便句子之间有明确的分隔
-            paragraph = paragraph.replace('.', '.\n')
+        #
+        # else:
+        #     # 否则，将句子中的句点后面的空格替换为换行符，以便句子之间有明确的分隔
+        #     paragraph = paragraph.replace('.', '.\n')
         formatted_paragraphs.append(paragraph.strip())
 
     return "\n\n".join(formatted_paragraphs)
