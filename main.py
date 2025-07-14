@@ -33,6 +33,15 @@ os.environ["LANGCHAIN_API_KEY"] = "lsv2_pt_d7ac9f75652c441ab137104af3cd2c34_aba9
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+MODEL = None
+EMBEDDINGS = None
+VECTORSTORE = None
+SYSTEM_PROMPT = None
+CHAIN = None
+PORT = 8001
+
+PROMPT_TEMPLATE_TXT = "prompts/prompt.txt"
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base_url", default = "https://dashscope.aliyuncs.com/compatible-mode/v1", help = "OpenAI API URL")
@@ -44,14 +53,7 @@ def parse_args():
 
     return parser.parse_args()
 
-MODEL = None
-EMBEDDINGS = None
-VECTORSTORE = None
-SYSTEM_PROMPT = None
-CHAIN = None
-PORT = 8001
 
-PROMPT_TEMPLATE_TXT = "prompts/prompt.txt"
 
 # 定义Message类
 class Message(BaseModel):
@@ -170,8 +172,9 @@ async def lifespan(app: FastAPI):
             "context": retriever,
         } | SYSTEM_PROMPT | get_prompt | MODEL
         logger.info(f"Initializeing IS Done")
+
     except Exception as e:
-        logger.error(f"初始化过程中出错: {str(e)}")
+        logger.error(f"Error in initialization: {str(e)}")
         # raise 关键字重新抛出异常，以确保程序不会在错误状态下继续运行
         raise
 
