@@ -220,8 +220,98 @@ async def lifespan(app: FastAPI):
     logger.info("Close Server Now...")
 
 # lifespan 参数用于在应用程序生命周期的开始和结束时执行一些初始化或清理工作
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan = lifespan)
 
 
 # POST请求接口，与大模型进行知识问答
 @app.post("/v1/chat/completions")
+async def chat_completions(request: ChatCompletionRequest):
+    if not MODEL or not EMBEDDINGS or not VECTORSTORE or not CHAIN or not SYSTEM_PROMPT:
+        logger.info("Server is not be initialized.")
+        raise HTTPException(status_code = 500, detail = "Server is not initialized.")
+    try:
+        logger.info(f"Get Chat Request from User: {request}")
+        user_query = request.messages[-1].content
+        logger.info(f"User Query: {user_query}")
+
+        retriever = VECTORSTORE.similarity_search(
+            query = user_query,
+            k = 3
+        )
+
+        # 调用CHAIN查询
+        result = with_message_history.invoke(
+            {
+                "query": user_query,
+                "context": retriever
+            },
+            config = {
+                "configurable":{
+                    "user_id": request.user_id,
+                    "conversation_id": request.conversation_id,
+                }
+            }
+        )
+
+        formatted_result = str(format_search_result(result.content))
+        logger.info(f"Formatted Search Result: {formatted_result}")
+
+        if request.stream:
+            async def stream_generate():
+                chunk_id = f"chatcmpl-{uuid.uuid4().hex}"
+                lines = formatted_result.split("\n")
+
+                for idx, line in enumerate(lines):
+                    chunk = {
+                        "id": chunk_id,
+                        "object": "chat.comleiton.chunk",
+                        "created": int(time.time()),
+                        "choices": [
+                            {
+                                "index": 0,
+                                "delta": {"content": line + '\n'},
+                                # if i > 0 else {"role": "assistant", "content": ""},
+                                "finish_reason": None
+                            }
+                        ]
+                    }
+
+                    yield f"{json.dumps(chunk)}\n"
+
+                    await asyncio.sleep(0.3)
+                final_chunk = {
+                    "id": chunk_id,
+                    "object": "chat.comleiton.chunk",
+                    "created": int(time.time()),
+                    "choices": [
+                        {
+                            "index": 0,
+                            "delte": {},
+                            "finish_reason": "stop"
+                        }
+                    ]
+                }
+                yield f"{json.dumps(final_chunk)}\n"
+            return StreamingResponse(stream_generate(), media_type = "text/event-stream")
+        else:
+            response = ChatCompletionResponse(
+                choices=[
+                    ChatCompletionResponseChoice(
+                        index=0,
+                        message=Message(role = "assistant", content = formatted_result),
+                        finish_reason="stop"
+                    )
+                ]
+            )
+            logger.info(f"发送响应内容: \n{response}")
+            # 返回fastapi.responses中JSONResponse对象
+            # model_dump()方法通常用于将Pydantic模型实例的内容转换为一个标准的Python字典，以便进行序列化
+            return JSONResponse(content=response.model_dump())
+    except Exception as e:
+        logger.error(f"Error in processing the Chat Session:\n\n {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+if __name__ == "__main__":
+    logger.info(f"Start the Server in Port{PORT}")
+    uvicorn.run(app, host="0.0.0.0", port = PORT)
