@@ -59,3 +59,13 @@ llama2.pdf:测试英文pdf文档处理
 
 在使用命令`python vectordb_save.py`启动脚本时，可以通过命令行参数配置相关设置。
 详情见[TOOLS_README](./tools/README.md)
+
+## 3.3 启动服务器server
+在使用`python main.py`命令启动脚本前，需根据自己的实际情况调整代码中的参数，具体参数参考代码
+
+## 3.4 启动测试脚本测试sever服务
+在运行`python apiTest.py`命令启动脚本前，需根据自己的实际情况调整代码中的如下参数，运行成功后，可以查看smith的跟踪情况                  
+**调整1:默认非流式输出 True or False**                  
+stream_flag = False                  
+**调整2:检查URL地址中的IP和PORT是否和main脚本中相同**                  
+url = "http://localhost:8081/v1/chat/completions"
